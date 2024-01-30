@@ -1,0 +1,8 @@
+{
+	"name": "stupid-buffer",
+	"description": "A simple stupid buffer interface, inspired by smart-buffer.",
+	"version": "1.0.0",
+	"main": "index.js",
+	"types": "index.d.ts",
+	"scripts": { "build": "tsc" }
+}
