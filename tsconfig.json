@@ -2,7 +2,9 @@
 	"compilerOptions": {
 		"strict": true,
 		"target": "ES6",
-		"declaration": true
+		"declaration": true,
+		"skipLibCheck": true,
+		"stripInternal": true
 	},
 	"files": ["index.ts"]
 }

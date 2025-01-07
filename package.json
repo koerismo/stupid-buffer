@@ -1,8 +1,19 @@
 {
 	"name": "stupid-buffer",
 	"description": "A simple stupid buffer interface, inspired by smart-buffer.",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"main": "index.js",
 	"types": "index.d.ts",
-	"scripts": { "build": "tsc" }
+	"keywords": [
+		"buffer",
+		"cursor",
+		"simple"
+	],
+	"scripts": {
+		"build": "tsc",
+		"test": "bun test"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.1.15"
+	}
 }

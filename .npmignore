@@ -1,4 +1,5 @@
 /index.ts
+/index.test.ts
 /tsconfig.json
 /.npmignore
 /.gitignore

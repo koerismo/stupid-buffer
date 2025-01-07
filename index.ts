@@ -1,6 +1,21 @@
 const TE = new TextEncoder();
 const TD = new TextDecoder();
 
+// Until float16 becomes standardized, we have to insert
+// these types to allow this package to compile.
+/** @internal */
+declare global {
+	type Float16Array = Float32Array;
+	const Float16Array: Float32ArrayConstructor;
+	interface Math {
+		f16round(value: number): number;
+	}
+	interface DataView {
+		setFloat16(byteOffset: number, value: number, littleEndian?: boolean): number;
+		getFloat16(byteOffset: number, littleEndian?: boolean): number;
+	}
+}
+
 export class ViewBuffer extends Uint8Array {
 	pointer = 0;
 	protected view: DataView;
@@ -34,6 +49,8 @@ export class ViewBuffer extends Uint8Array {
 
 	/** Moves the pointer to the specified position. */
 	seek(position: number) {
+		if (position < 0 || position >= this.length)
+			throw RangeError('Cannot seek outside of buffer! ('+position+')');
 		this.pointer = position;
 	}
 
@@ -49,7 +66,7 @@ export class ViewBuffer extends Uint8Array {
 
 	read_u8(): number;
 	read_u8(length: number): Uint8Array;
-	read_u8(length?: number) {
+	read_u8(length?: number): number|Uint8Array {
 		const start = this.pointer;
 
 		if (length === undefined) {
@@ -76,7 +93,7 @@ export class ViewBuffer extends Uint8Array {
 
 	read_u16(): number;
 	read_u16(length: number, little?: boolean): Uint16Array;
-	read_u16(length?: number, little: boolean=this.little) {
+	read_u16(length?: number, little: boolean=this.little): number|Uint16Array {
 		const start = this.pointer;
 
 		if (length === undefined) {
@@ -105,7 +122,7 @@ export class ViewBuffer extends Uint8Array {
 
 	read_u32(): number;
 	read_u32(length: number, little?: boolean): Uint32Array;
-	read_u32(length?: number, little: boolean=this.little) {
+	read_u32(length?: number, little: boolean=this.little): number|Uint32Array {
 		const start = this.pointer;
 
 		if (length === undefined) {
@@ -134,7 +151,7 @@ export class ViewBuffer extends Uint8Array {
 
 	read_i8(): number;
 	read_i8(length: number): Int8Array;
-	read_i8(length?: number) {
+	read_i8(length?: number): number|Int8Array {
 		const start = this.pointer;
 
 		if (length === undefined) {
@@ -161,7 +178,7 @@ export class ViewBuffer extends Uint8Array {
 
 	read_i16(): number;
 	read_i16(length: number, little?: boolean): Int16Array;
-	read_i16(length?: number, little: boolean=this.little) {
+	read_i16(length?: number, little: boolean=this.little): number|Int16Array {
 		const start = this.pointer;
 
 		if (length === undefined) {
@@ -190,7 +207,7 @@ export class ViewBuffer extends Uint8Array {
 
 	read_i32(): number;
 	read_i32(length: number, little?: boolean): Int32Array;
-	read_i32(length?: number, little: boolean=this.little) {
+	read_i32(length?: number, little: boolean=this.little): number|Int32Array {
 		const start = this.pointer;
 
 		if (length === undefined) {
@@ -217,9 +234,38 @@ export class ViewBuffer extends Uint8Array {
 		return;
 	}
 
+	read_f16(): number;
+	read_f16(length: number, little?: boolean): Float16Array;
+	read_f16(length?: number, little: boolean=this.little): number|Float16Array {
+		const start = this.pointer;
+
+		if (length === undefined) {
+			this.pointer += 2;
+			return this.view.getFloat16(start, little);
+		}
+
+		this.pointer += length * 2;
+		const arr = new Float16Array(length);
+		for ( let i=0; i<length; i++ ) arr[i] = this.view.getFloat16(start + i*2, little);
+		return arr;
+	}
+
+	write_f16(value: number|Float16Array, little: boolean=this.little) {
+		const start = this.pointer;
+
+		if (typeof value === 'number') {
+			this.pointer += 2;
+			return this.view.setFloat16(start, value, little);
+		}
+
+		this.pointer += value.length * 2;
+		for ( let i=0; i<value.length; i++ ) this.view.setFloat16(start + i*2, value[i], little);
+		return;
+	}
+
 	read_f32(): number;
 	read_f32(length: number, little?: boolean): Float32Array;
-	read_f32(length?: number, little: boolean=this.little) {
+	read_f32(length?: number, little: boolean=this.little): number|Float32Array {
 		const start = this.pointer;
 
 		if (length === undefined) {
@@ -248,7 +294,7 @@ export class ViewBuffer extends Uint8Array {
 
 	read_f64(): number;
 	read_f64(length: number, little?: boolean): Float64Array;
-	read_f64(length?: number, little: boolean=this.little) {
+	read_f64(length?: number, little: boolean=this.little): number|Float64Array {
 		const start = this.pointer;
 
 		if (length === undefined) {
@@ -303,7 +349,7 @@ export class ViewBuffer extends Uint8Array {
 			this.pointer ++;
 		}
 		else if (str.length !== length) {
-			throw new RangeError('String of length '+str.length+' does not match write length of '+length+'!');
+			throw RangeError('String of length '+str.length+' does not match write length of '+length+'!');
 		}
 	}
 }
