@@ -1,5 +1,5 @@
 # stupid-buffer
-A simple stupid buffer interface, inspired by smart-buffer.
+A stupid simple buffer interface, inspired by smart-buffer.
 
 ```
 npm i stupid-buffer

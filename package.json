@@ -1,9 +1,10 @@
 {
 	"name": "stupid-buffer",
-	"description": "A simple stupid buffer interface, inspired by smart-buffer.",
-	"version": "1.0.1",
+	"description": "A stupid simple buffer interface, inspired by smart-buffer.",
+	"version": "1.0.2",
 	"main": "index.js",
 	"types": "index.d.ts",
+	"license": "MIT",
 	"keywords": [
 		"buffer",
 		"cursor",
