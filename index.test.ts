@@ -33,15 +33,17 @@ function runTests(view: Buffer) {
 		view.write_u8(0xAB);
 		view.write_u16(0xABCD);
 		view.write_u32(0x1234ABCD);
+		view.write_u64(0xABCD1234ABCD1234n);
 		view.write_i8(0xAB);
 		view.write_i16(0xABCD);
 		view.write_i32(0xABCD1234);
-		assert.strictEqual(view.pointer, 14);
+		view.write_i64(0xABCD1234ABCD1234n);
+		assert.strictEqual(view.pointer, 30);
 
 		view.write_f16(v_f16);
 		view.write_f32(v_f32);
 		view.write_f64(v_f64);
-		assert.strictEqual(view.pointer, 28);
+		assert.strictEqual(view.pointer, 44);
 	});
 
 	it('ViewBuffer Read  (single)', () => {
@@ -49,15 +51,17 @@ function runTests(view: Buffer) {
 		assert.strictEqual(view.read_u8(), 0xAB);
 		assert.strictEqual(view.read_u16(), 0xABCD);
 		assert.strictEqual(view.read_u32(), 0x1234ABCD);
+		assert.strictEqual(view.read_u64(), 0xABCD1234ABCD1234n);
 		assert.strictEqual(view.read_i8(), -85);
 		assert.strictEqual(view.read_i16(), -21555);
 		assert.strictEqual(view.read_i32(), -1412623820);
-		assert.strictEqual(view.pointer, 14);
+		assert.strictEqual(view.read_i64(), -6067173105568247244n);
+		assert.strictEqual(view.pointer, 30);
 
 		assert.strictEqual(view.read_f16(), v_f16);
 		assert.strictEqual(view.read_f32(), v_f32);
 		assert.strictEqual(view.read_f64(), v_f64);
-		assert.strictEqual(view.pointer, 28);
+		assert.strictEqual(view.pointer, 44);
 	});
 
 	const i8_array  =   new Int8Array([0xAA, 0xBB, 0xCC, 0xDD]);
@@ -66,6 +70,8 @@ function runTests(view: Buffer) {
 	const u16_array = new Uint16Array([0xAABB, 0xCCDD, 0xDEAD, 0xBEEF]);
 	const i32_array =  new Int32Array([0xDEADBEEF, 0xABADCAFE, 0xFEEDFACE, 0xFADEDEAD]);
 	const u32_array = new Uint32Array([0xDEADBEEF, 0xABADCAFE, 0xFEEDFACE, 0xFADEDEAD]);
+	const i64_array = new BigInt64Array([0xDEADBEEFDEADBEEFn, 0xABADCAFEABADCAFEn, 0xFEEDFACEFEEDFACEn, 0xFADEDEADFADEDEADn]);
+	const u64_array = new BigUint64Array([0xDEADBEEFDEADBEEFn, 0xABADCAFEABADCAFEn, 0xFEEDFACEFEEDFACEn, 0xFADEDEADFADEDEADn]);
 	
 	const f16_array = new Float16Array([0.123456789, 0.123456789 * 2, 0.123456789 * 3, 0.123456789 * 4]);
 	const f32_array = new Float32Array([0.123456789, 0.123456789 * 2, 0.123456789 * 3, 0.123456789 * 4]);
@@ -76,15 +82,17 @@ function runTests(view: Buffer) {
 		view.write_u8(u8_array);
 		view.write_u16(u16_array);
 		view.write_u32(u32_array);
+		view.write_u64(u64_array);
 		view.write_i8(i8_array);
 		view.write_i16(i16_array);
 		view.write_i32(i32_array);
-		assert.strictEqual(view.pointer, 56);
+		view.write_i64(i64_array);
+		assert.strictEqual(view.pointer, 120);
 
 		view.write_f16(f16_array);
 		view.write_f32(f32_array);
 		view.write_f64(f64_array);
-		assert.strictEqual(view.pointer, 112);
+		assert.strictEqual(view.pointer, 176);
 	});
 
 	it('ViewBuffer Read  (array)', () => {
@@ -92,15 +100,17 @@ function runTests(view: Buffer) {
 		assert.deepStrictEqual(view.read_u8(4), u8_array);
 		assert.deepStrictEqual(view.read_u16(4), u16_array);
 		assert.deepStrictEqual(view.read_u32(4), u32_array);
+		assert.deepStrictEqual(view.read_u64(4), u64_array);
 		assert.deepStrictEqual(view.read_i8(4), i8_array);
 		assert.deepStrictEqual(view.read_i16(4), i16_array);
 		assert.deepStrictEqual(view.read_i32(4), i32_array);
-		assert.strictEqual(view.pointer, 56);
+		assert.deepStrictEqual(view.read_i64(4), i64_array);
+		assert.strictEqual(view.pointer, 120);
 
 		assert.deepStrictEqual(view.read_f16(4), f16_array);
 		assert.deepStrictEqual(view.read_f32(4), f32_array);
 		assert.deepStrictEqual(view.read_f64(4), f64_array);
-		assert.strictEqual(view.pointer, 112);
+		assert.strictEqual(view.pointer, 176);
 	});
 
 	it('ViewBuffer Write (string)', () => {
@@ -115,7 +125,7 @@ function runTests(view: Buffer) {
 		// Bad length
 		assert.throws(() => view.write_str('ABCD', 3));
 		// OOB
-		assert.throws(() => view.write_str('ABCD'.repeat(20)));
+		assert.throws(() => view.write_str('ABCD'.repeat(30)));
 	});
 
 	it('ViewBuffer Read  (string)', () => {
@@ -131,13 +141,13 @@ function runTests(view: Buffer) {
 
 
 describe('Big Endian   ', () => {
-	const view = new Buffer(128);
+	const view = new Buffer(176);
 	view.set_endian(false);
 	runTests(view);
 });
 
 describe('Little Endian', () => {
-	const view = new Buffer(128);
+	const view = new Buffer(176);
 	view.set_endian(true);
 	runTests(view);
 });

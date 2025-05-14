@@ -149,6 +149,36 @@ export class ViewBuffer extends Uint8Array {
 		return;
 	}
 
+
+	read_u64(): bigint;
+	read_u64(length: number, little?: boolean): BigUint64Array;
+	read_u64(length?: number, little: boolean=this.little): bigint|BigUint64Array {
+		const start = this.pointer;
+
+		if (length === undefined) {
+			this.pointer += 8;
+			return this.view.getBigUint64(start, little);
+		}
+
+		this.pointer += length * 8;
+		const arr = new BigUint64Array(length);
+		for ( let i=0; i<length; i++ ) arr[i] = this.view.getBigUint64(start + i*8, little);
+		return arr;
+	}
+
+	write_u64(value: bigint|BigUint64Array, little: boolean=this.little) {
+		const start = this.pointer;
+
+		if (typeof value === 'bigint') {
+			this.pointer += 8;
+			return this.view.setBigUint64(start, value, little);
+		}
+
+		this.pointer += value.length * 8;
+		for ( let i=0; i<value.length; i++ ) this.view.setBigUint64(start + i*8, value[i], little);
+		return;
+	}
+
 	read_i8(): number;
 	read_i8(length: number): Int8Array;
 	read_i8(length?: number): number|Int8Array {
@@ -231,6 +261,35 @@ export class ViewBuffer extends Uint8Array {
 
 		this.pointer += value.length * 4;
 		for ( let i=0; i<value.length; i++ ) this.view.setInt32(start + i*4, value[i], little);
+		return;
+	}
+
+	read_i64(): bigint;
+	read_i64(length: number, little?: boolean): BigInt64Array;
+	read_i64(length?: number, little: boolean=this.little): bigint|BigInt64Array {
+		const start = this.pointer;
+
+		if (length === undefined) {
+			this.pointer += 8;
+			return this.view.getBigInt64(start, little);
+		}
+
+		this.pointer += length * 8;
+		const arr = new BigInt64Array(length);
+		for ( let i=0; i<length; i++ ) arr[i] = this.view.getBigInt64(start + i*8, little);
+		return arr;
+	}
+
+	write_i64(value: bigint|BigInt64Array, little: boolean=this.little) {
+		const start = this.pointer;
+
+		if (typeof value === 'bigint') {
+			this.pointer += 8;
+			return this.view.setBigInt64(start, value, little);
+		}
+
+		this.pointer += value.length * 8;
+		for ( let i=0; i<value.length; i++ ) this.view.setBigInt64(start + i*8, value[i], little);
 		return;
 	}
 
